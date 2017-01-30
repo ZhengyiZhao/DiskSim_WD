@@ -1,0 +1,19 @@
+dm_disk Kojn_RE.model {
+  Number of data surfaces = 10,
+  Number of cylinders = 350786,
+  Block count = 7965046938,
+  Layout Model = source drv_layout_WMC130016205_g4.layout,
+  Disk Power = source KOJN_RE.power,
+  Mechanical Model = dm_mech_g1 {
+    Access time type = trackSwitchPlusRotation,
+    Seek type = extracted,
+    Full seek curve = disksim_KOJN_RE_model_WMC130016205_dual.seek,
+    Add. write settling delay = 0.266314,
+    Head switch time = 0.15,
+    Rotation speed (in rpms) = 7200,
+    Percent error in rpms = 0.0
+  }
+  # Head switch time: approximation: 60000 ms / RPM * Head_wedge_skew / total_wedges
+} # end of SIRIUS_600GB.model spec
+# drv_layout_WMC130016205_g4.layout
+# disksim_KOJN_RE_model_WMC130005734

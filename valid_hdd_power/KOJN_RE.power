@@ -1,0 +1,29 @@
+dm_mech_power KOJN_RE.power {
+ Spindle power curve vs zone = SpindleZone_KOJN_RE.power,
+ VCM Seek energy vs cylinder distance = KOJIN_RE_seek.energy,
+ VCM Bias power vs zone = VCM_Bias_KOJN_RE.power,
+ Head read power = 3.95,
+ Head write power = 1.56,
+ Servo channel power = 0.65,
+ Byte size per block = 512,
+ RAM active power = 1.15,
+ RAM idle power = 0.08,
+ SSD active power = 2.4,
+ SSD idle power = 0.06,
+ Spindle idle power = 7.5,
+ HDD idle one inactive wait ms = 30.0,
+ HDD idle one recover time to active = 18.0,
+ HDD Power idle one in watt = 5.0,
+ HDD idle two inactive wait ms = 300.0,
+ HDD idle two recover time to active = 30.0,
+ HDD Power idle two in watt = 4.0,
+ HDD idle three inactive wait ms = 8000.0,
+ HDD idle three recover time to active = 320.0,
+ HDD Power idle three in watt = 3.0,
+ HDD idle four standby trigger mode = Timer,
+ HDD idle four standby timer ms = 60000.0,
+ HDD Power idle four in watt = 1.0,
+ HDD standby recover time to active = 3700.0
+}
+
+## SpindleZone_KOJN_RE.power
