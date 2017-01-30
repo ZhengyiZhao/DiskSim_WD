@@ -1,0 +1,17 @@
+dm_disk SIRIUS_600GB.model {
+  Number of data surfaces = 4,
+  Number of cylinders = 161678,
+  Block count = 1211539003,
+  Layout Model = source SIRIUSPL_WX31E92KH716_4heads_g4.layout,
+  Mechanical Model = dm_mech_g1 {
+    Access time type = trackSwitchPlusRotation,
+    Seek type = extracted,
+    Full seek curve = SIRIUS_600GB_read_scaled_dual.seek,
+    Add. write settling delay = 0.266314,
+    Head switch time = 0.15,
+    Rotation speed (in rpms) = 10000,
+    Percent error in rpms = 0.0
+  }
+  # Head switch time: approximation: 60000 ms / RPM * Head_wedge_skew / total_wedges
+} # end of SIRIUS_600GB.model spec
+
