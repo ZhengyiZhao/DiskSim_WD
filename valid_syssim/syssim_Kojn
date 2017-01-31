@@ -1,0 +1,38 @@
+#!/bin/sh
+
+PREFIX=../src
+
+for j in 10 
+do
+
+echo ""
+echo $j
+
+
+  ${PREFIX}/test_wd_syssim KOJN_RE.parv SysSym_KOJN_RE_${j}.outv 7912262320 ../../../disksim-00_traces/SPC_WCD_KOJN_RE/kojin_bsu${j}_17sec.trc
+
+  grep "End queued" SysSym_KOJN_RE_${j}.outv
+  grep "IOdriver Requests per second" SysSym_KOJN_RE_${j}.outv
+  grep "IOdriver Response time average" SysSym_KOJN_RE_${j}.outv
+  cp log_sim_results.txt SysSym_KOJN_RE_${j}_log.csv
+done
+
+
+
+for j in 10 
+do
+
+echo ""
+echo $j
+
+
+  ${PREFIX}/disksim KOJN_RE.parv Spc_KOJN_RE_${j}.outv ascii ../../../disksim-00_traces/SPC_WCD_KOJN_RE/kojin_bsu${j}_17sec.trc  0 
+
+  grep "End queued" Spc_KOJN_RE_${j}.outv
+  grep "IOdriver Requests per second" Spc_KOJN_RE_${j}.outv
+  grep "IOdriver Response time average" Spc_KOJN_RE_${j}.outv
+
+  cp log_sim_results.txt DiskSym_KOJN_RE_${j}_log.csv
+done
+
+

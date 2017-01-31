@@ -1,0 +1,4 @@
+
+PREFIX=../src
+
+${PREFIX}/test_wd_syssim KOJN_RE.parv SysSym_KOJN_RE.outv ascii ../../../disksim-00_traces/SPC_WCD_KOJN_RE/kojin_bsu10_17sec.trc
