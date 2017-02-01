@@ -1,0 +1,4 @@
+Extend from DiskSim 4.0
+64bit LBA
+HDD power modeling
+Functions to support ABA and Shingled Magnetic Recording( Write Overlap)
