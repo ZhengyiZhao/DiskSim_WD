@@ -1,0 +1,94 @@
+
+# diskmodel (version 1.0)
+# Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+# @9   64-bit LBA   Zhengyi.ZHAO@wdc.com, 2014Aug
+# @011 Power model  Zhengyi.ZHAO@wdc.com, 2014Sept
+
+MODULE disk
+HEADER \#include "../dm.h"
+RESTYPE struct dm_disk_if *
+
+PROTO struct dm_disk_if * dm_disk_loadparams(struct lp_block *b, int *num);
+#PROTO struct dm_power_if * dm_mech_power_loadparams(struct lp_block *b,  struct dm_disk_if *parent);
+
+# S		1
+PARAM Block count		I		1 
+TEST i >= 0
+INIT result->dm_sectors = (long int)i;
+
+This specifies the number of data blocks.  This capacity is exported by the
+disk (e.g.,~to a disk array controller).  It is not used directly
+during simulation, but is compared to a similar value computed from
+other disk parameters.  A warning is reported if the values differ.
+
+
+PARAM Number of data surfaces		I	1 
+TEST i > 0
+INIT result->dm_surfaces = i;
+
+This specifies the number of magnetic media surfaces (not platters!) on
+which data are recorded.  Dedicated servo surfaces should not be
+counted for this parameter.
+
+
+PARAM Number of cylinders		I	1 
+TEST i > 0
+INIT result->dm_cyls = i;
+
+This specifies the number of physical cylinders.  All cylinders that impact
+the logical to physical mappings should be included.
+
+PARAM Flag of meadia head(smr or cmr)		I	0 
+TEST i >= 0
+INIT result->iFlag_cmr_smr_combo = i;
+
+This specifies the surface type, SMR, or CMR or combination of SMR and CMR.
+
+PARAM Number of wedges		I		0
+TEST i > 0
+INIT result->nTotal_wedges_per_track = i;
+
+PARAM Mechanical Model			BLOCK	0
+TEST result->mech = ((dm_mech_loader_t)blk->loader)(blk, result)
+
+This block defines the disk's mechanical model.  Currently,
+the only available implementation is \texttt{dm\_mech\_g1}.
+
+PARAM Layout Model			BLOCK	1
+TEST result->layout = ((dm_layout_loader_t)blk->loader)(blk, result)
+
+This block defines the disk's layout model.  
+
+# @011
+PARAM Disk Power			BLOCK	0
+INIT uintptr_t pBufAddress = dm_mech_power_loadparams(blk, result);
+TEST pBufAddress > 0
+#INIT result->stpPowerHDD = pBufAddress;
+
+This block defines the disk's power model
+

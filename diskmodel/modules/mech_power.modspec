@@ -1,0 +1,184 @@
+
+# disk power model (version 1.0)
+# Authors: Wan Jie, Zhengyi, XuJun
+# Contributors: Zhengyi
+#
+# Copyright (c) of Werstern Digital, 2014-2019.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. Werstern 
+# Digital DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+ 
+MODULE mech_power
+HEADER \#include "../mech_g1.h"
+HEADER \#include "../dm_power.h"
+HEADER \#include "../dm_power_private.h"
+RESTYPE struct dm_mech_power *
+PROTO struct dm_power_if *dm_mech_power_loadparams(struct lp_block *b,  struct dm_disk_if *parent);
+
+PARAM Spindle power curve vs zone		S	0 
+INIT dm_mech_power_load_spindle_zone_curve(s, 
+INIT				    &(result->nTotalCntSpindlePowerAtZone), 
+INIT			            &(result->aidxZoneSpindlePower),  
+INIT                                &(result->afPowerSpindle)); 
+INIT
+
+The name specifies an input file containing the spindle power consumption, which is related with the R/W head location, as in zone-id.
+
+PARAM VCM Seek energy vs cylinder distance		S	0 
+#INIT dm_mech_power_load_vcm_seek_energy_curve(s,
+INIT  dm_mech_power_load_vcm_seek_dual_energy_curve(s, 
+INIT				    &(result->nTotalCntVoiceCoilSeekTable),
+INIT			            &(result->aidxSeekCylinderDist),  
+INIT                                &(result->afPowerVCM_RdSeekEnergy),
+INIT                                &(result->afPowerVCM_WrSeekEnergy),
+INIT                                &(result->iFlagDualSeek)); 
+INIT
+
+The name specifies an input file, which contains the seek energy of a Voice Coil Motor(VCM), v.s. cylinder distance.
+
+PARAM VCM Bias power vs zone			S	0
+INIT dm_mech_power_load_vcm_bias_current_zone(s,
+INIT                                        &(result->nTotalCntVoiceCoilBiasPowerAtZone),
+INIT                                        &(result->aidxZoneVoiceCoilBiasPower),
+INIT                                        &(result->afPowerVCM_Bias));
+INIT 
+
+The name specifies an input file, which contains the bias current power for the VCM. This bias power is a function of zone-id. The power is for VCM to stay on a track, i.e. track following.
+
+PARAM Head read power			D	1
+TEST d >= 0.0 
+INIT result->stPowerHeadRW_w.fHeadPowerRead = d; 
+
+This is the power consumption for Read/Write (R/W) head. The power especially for R/W head doing read operation.
+
+
+PARAM Head write power			D	1
+TEST d >= 0.0 
+INIT result->stPowerHeadRW_w.fHeadPowerWrite = d; 
+
+This is the power consumption for R/W head, when it is doing the write operation.
+
+PARAM Servo channel power		D	1
+TEST d >= 0.0
+INIT result->stPowerHeadRW_w.fHeadServoPower = d;
+
+This is the power consumption for R/W head, when servo is enabled. It only reads back the signals as a feedback for the servo track-following.
+
+PARAM Byte size per block				I	1
+TEST i > 0
+INIT result->nByteSize_per_blk = i;
+
+This is to specify the size of a sector block. Conventional HDD has 512 Bytes per sector, while latest HDD in some applications (i.e. laptop and etc.) is using 4096 Bytes per sector.
+
+PARAM RAM active power					D	1
+TEST d >= 0
+INIT result->stPowerRAM_w.fPowerRAM_Active = d;
+
+This is to specify the active power, unit is watt, for RAM(Random Access Memory) and CPU.
+
+PARAM RAM idle power					D	1
+TEST d >= 0
+INIT result->stPowerRAM_w.fPowerRAM_Idle = d;
+
+This is to specify the idle power, unit is watt, for RAM and CPU.
+
+PARAM SSD active power					D	1
+TEST d >= 0
+INIT result->stPowerSSD_w.fPowerSSD_Active = d;
+
+This is to specify the active power, unit is watt, for SSD (Solid State Drive), or flash memory on the PCBA.
+
+PARAM SSD idle power					D	1
+TEST d >= 0
+INIT result->stPowerSSD_w.fPowerSSD_Idle = d;
+
+This is to specify the idle power, unit is watt, for SSD, or flash memory on the PCBA. This SSD(or flash memory) is non-volatile and the data will NOT lose when power is off.
+
+PARAM HDD idle one inactive wait ms		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_1_inactive_wait_ms = d;
+
+This is to specify the time duration (in ms), for an HDD entering idle-1 mode.
+
+PARAM HDD idle one recover time to active		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_1_recover_time_to_active = d;
+
+This is to specify the time duration (in ms), for an HDD to exit from idle-1 mode to active.
+
+PARAM HDD Power idle one in watt			D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_1_power = d;
+
+This is to specify the power consumption for an HDD in the idle-1 mode.
+
+PARAM Spindle idle power				D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fSpindleIdlePower_w = d;
+
+This is to specify the power consumption for a spindle of an HDD in the general idle mode. Only some models of HDD have this power-saving feature. For this power-saving feature, the spindle might rotate in a lower-RPM.
+
+PARAM HDD idle two inactive wait ms		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_2_inactive_wait_ms = d;
+
+
+PARAM HDD idle two recover time to active		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_2_recover_time_to_active = d;
+
+PARAM HDD Power idle two in watt			D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_2_power = d;
+
+
+PARAM HDD idle three inactive wait ms		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_3_inactive_wait_ms = d;
+
+
+PARAM HDD idle three recover time to active		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_3_recover_time_to_active = d;
+
+PARAM HDD Power idle three in watt			D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_3_power = d;
+
+
+# fHDD_idle_4_standby_trigger_mode
+PARAM HDD idle four standby trigger mode		S	0
+
+
+PARAM HDD idle four standby timer ms		D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_4_standby_timer_ms = d;
+
+
+PARAM HDD standby recover time to active	D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_standby_recover_time_to_active = d;
+
+PARAM HDD Power idle four in watt			D	1
+TEST d >= 0
+INIT result->stPowerIdleModeSystemCfg.fHDD_idle_4_power = d;
+
